@@ -14,14 +14,13 @@ import (
 // сгенерированных чисел.
 func Generator(ctx context.Context, ch chan<- int64, fn func(int64)) {
 	var num int64 = 1
-
+	defer close(ch)
 	for {
 		select {
 		case <-ctx.Done():
 			close(ch)
 			return
 		case ch <- num:
-
 			fn(num)
 			num++
 		}
@@ -30,6 +29,7 @@ func Generator(ctx context.Context, ch chan<- int64, fn func(int64)) {
 
 func Worker(in <-chan int64, out chan<- int64) {
 	// 2. Функция Worker
+	defer close(out)
 	for {
 		num, ok := <-in
 		if !ok {
